@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             id="Definitions_1"
+             targetNamespace="http://bpmn.io/schema/bpmn"
+             exporter="bpmn-js"
+             exporterVersion="17.0.0">
+  <process id="Process_Registration" name="Регистрация пользователя" isExecutable="false">
+    <startEvent id="StartEvent_1" name="Начало регистрации">
+      <outgoing>Flow_Start_Input</outgoing>
+    </startEvent>
+
+    <userTask id="Task_InputData" name="Ввести данные (имя, email, пароль)">
+      <incoming>Flow_Start_Input</incoming>
+      <incoming>Flow_Invalid_Retry</incoming>
+      <outgoing>Flow_Input_Check</outgoing>
+    </userTask>
+
+    <serviceTask id="Task_CheckData" name="Проверить корректность данных">
+      <incoming>Flow_Input_Check</incoming>
+      <outgoing>Flow_Check_Gateway</outgoing>
+    </serviceTask>
+
+    <exclusiveGateway id="Gateway_DataValid" name="Данные корректны?">
+      <incoming>Flow_Check_Gateway</incoming>
+      <outgoing>Flow_Valid_SendEmail</outgoing>
+      <outgoing>Flow_Invalid_Retry</outgoing>
+    </exclusiveGateway>
+
+    <serviceTask id="Task_SendEmail" name="Отправить письмо для подтверждения">
+      <incoming>Flow_Valid_SendEmail</incoming>
+      <outgoing>Flow_SendEmail_Confirm</outgoing>
+    </serviceTask>
+
+    <userTask id="Task_Confirm" name="Подтвердить регистрацию">
+      <incoming>Flow_SendEmail_Confirm</incoming>
+      <outgoing>Flow_Confirm_Gateway</outgoing>
+    </userTask>
+
+    <exclusiveGateway id="Gateway_Confirmed" name="Подтверждено?">
+      <incoming>Flow_Confirm_Gateway</incoming>
+      <outgoing>Flow_Confirmed_Success</outgoing>
+      <outgoing>Flow_NotConfirmed_End</outgoing>
+    </exclusiveGateway>
+
+    <endEvent id="End_Success" name="Успешная регистрация">
+      <incoming>Flow_Confirmed_Success</incoming>
+    </endEvent>
+
+    <endEvent id="End_NotConfirmed" name="Регистрация не подтверждена">
+      <incoming>Flow_NotConfirmed_End</incoming>
+    </endEvent>
+
+    <sequenceFlow id="Flow_Start_Input" sourceRef="StartEvent_1" targetRef="Task_InputData" />
+    <sequenceFlow id="Flow_Input_Check" sourceRef="Task_InputData" targetRef="Task_CheckData" />
+    <sequenceFlow id="Flow_Check_Gateway" sourceRef="Task_CheckData" targetRef="Gateway_DataValid" />
+
+    <sequenceFlow id="Flow_Valid_SendEmail" name="Да" sourceRef="Gateway_DataValid" targetRef="Task_SendEmail">
+      <conditionExpression xsi:type="tFormalExpression">${dataValid == true}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_Invalid_Retry" name="Нет" sourceRef="Gateway_DataValid" targetRef="Task_InputData">
+      <conditionExpression xsi:type="tFormalExpression">${dataValid == false}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_SendEmail_Confirm" sourceRef="Task_SendEmail" targetRef="Task_Confirm" />
+    <sequenceFlow id="Flow_Confirm_Gateway" sourceRef="Task_Confirm" targetRef="Gateway_Confirmed" />
+
+    <sequenceFlow id="Flow_Confirmed_Success" name="Да" sourceRef="Gateway_Confirmed" targetRef="End_Success">
+      <conditionExpression xsi:type="tFormalExpression">${confirmed == true}</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_NotConfirmed_End" name="Нет" sourceRef="Gateway_Confirmed" targetRef="End_NotConfirmed">
+      <conditionExpression xsi:type="tFormalExpression">${confirmed == false}</conditionExpression>
+    </sequenceFlow>
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_Registration">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="100" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_InputData_di" bpmnElement="Task_InputData">
+        <dc:Bounds x="180" y="78" width="140" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_CheckData_di" bpmnElement="Task_CheckData">
+        <dc:Bounds x="370" y="78" width="140" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Gateway_DataValid_di" bpmnElement="Gateway_DataValid" isMarkerVisible="true">
+        <dc:Bounds x="560" y="93" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_SendEmail_di" bpmnElement="Task_SendEmail">
+        <dc:Bounds x="660" y="78" width="140" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Task_Confirm_di" bpmnElement="Task_Confirm">
+        <dc:Bounds x="850" y="78" width="140" height="80" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Gateway_Confirmed_di" bpmnElement="Gateway_Confirmed" isMarkerVisible="true">
+        <dc:Bounds x="1040" y="93" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="End_Success_di" bpmnElement="End_Success">
+        <dc:Bounds x="1140" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="End_NotConfirmed_di" bpmnElement="End_NotConfirmed">
+        <dc:Bounds x="1140" y="220" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_Start_Input_di" bpmnElement="Flow_Start_Input">
+        <di:waypoint x="136" y="118" />
+        <di:waypoint x="180" y="118" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_Input_Check_di" bpmnElement="Flow_Input_Check">
+        <di:waypoint x="320" y="118" />
+        <di:waypoint x="370" y="118" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_Check_Gateway_di" bpmnElement="Flow_Check_Gateway">
+        <di:waypoint x="510" y="118" />
+        <di:waypoint x="560" y="118" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_Valid_SendEmail_di" bpmnElement="Flow_Valid_SendEmail">
+        <di:waypoint x="610" y="118" />
+        <di:waypoint x="660" y="118" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_Invalid_Retry_di" bpmnElement="Flow_Invalid_Retry">
+        <di:waypoint x="585" y="143" />
+        <di:waypoint x="585" y="200" />
+        <di:waypoint x="250" y="200" />
+        <di:waypoint x="250" y="158" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_SendEmail_Confirm_di" bpmnElement="Flow_SendEmail_Confirm">
+        <di:waypoint x="800" y="118" />
+        <di:waypoint x="850" y="118" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_Confirm_Gateway_di" bpmnElement="Flow_Confirm_Gateway">
+        <di:waypoint x="990" y="118" />
+        <di:waypoint x="1040" y="118" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_Confirmed_Success_di" bpmnElement="Flow_Confirmed_Success">
+        <di:waypoint x="1090" y="118" />
+        <di:waypoint x="1140" y="118" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Flow_NotConfirmed_End_di" bpmnElement="Flow_NotConfirmed_End">
+        <di:waypoint x="1065" y="143" />
+        <di:waypoint x="1065" y="238" />
+        <di:waypoint x="1140" y="238" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
